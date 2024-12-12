@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace Calculator
 {
@@ -10,71 +12,168 @@ namespace Calculator
     {
         static void Main(string[] args)
         {
-            
-            char[] op = new char[4]; // declaring the type of operation
-            op[0] = 'a';
-            op[1] = 's';
-            op[2] = 'm';
-            op[3] = 'd';
-            double num1 = 0; double num2 = 0; double result = 0; //declaring numbers and the result
-
-            Console.WriteLine("Simple Console Calculator\r"); //just to look at little bit better
-            Console.WriteLine("-------------------------\n");
-
-            Console.Write("Type a number: ");
-            num1 = Convert.ToDouble(Console.ReadLine()); //getting the first number
-
-            Console.WriteLine("Choose an option from the following list:"); //found this on internet and i like the model so i just copy it, it let the user chose wich type of operation he wants to do
-            Console.WriteLine("\ta - Add");
-            Console.WriteLine("\ts - Subtract");
-            Console.WriteLine("\tm - Multiply");
-            Console.WriteLine("\td - Divide");
-            Console.Write("Your option? ");
-            /* i wasted like one hour becouse of the error CS1501 searching everywhere what is the error, but ChatGPT came to save me 
-             The Console.ReadLine dosent accept argumets it just reads and prints it as a string at first i tried Console.ReadLine(op[0], op[1], op[2], op[3] */
-            char operation = Console.ReadLine()[0]; 
-
-
-            Console.Write("Type another number: ");
-            num2 = Convert.ToDouble(Console.ReadLine()); //getting second number
-
-            switch (operation) //simple switch, at first i tried if but switch was more simple for me :)
+            while (true)
             {
-                // add
-                case 'a':
-                    result = num1 + num2;
-                    Console.WriteLine($"Your result: {num1} + {num2} = {result}");
-                    break;
-                // substract
-                case 's':
-                    result = num1 - num2;
-                    Console.WriteLine($"Your result: {num1} - {num2} = {result}");
-                    break;
-                // multiplies
-                case 'm':
-                    result = num1 * num2;
-                    Console.WriteLine($"Your result: {num1} * {num2} = {result}");
-                    break;
-                // divides
-                case 'd':
-                    if (num2 != 0) //checking if user typed 0 becouse u cant divide by 0, duhh
+                Nums nums = new Nums();
+                Ops ops = new Ops();
+
+                Color("=================", ConsoleColor.Red);
+                Console.WriteLine("Simple Calculator");
+                Color("=================", ConsoleColor.Red);
+
+                while (true)
+                {
+                    Console.WriteLine("\n");
+                    Color2("Your first number: ", ConsoleColor.Green);
+                    string num1 = Console.ReadLine();
+
+
+                    try
                     {
-                        result = num1 / num2;
-                        Console.WriteLine($"Your result: {num1} / {num2} = {result}");
+                        nums.Num1 = Convert.ToDecimal(num1);
+                        break;
                     }
-                    else
+                    catch (FormatException)
                     {
-                        Console.WriteLine("Error: U cant divide by 0."); //made an error confirmation for user to let them know
+                        Color("ERROR, Please use numbers!", ConsoleColor.Red);
+                        Console.ReadLine();
+                        Console.Clear();
+                        Color("=================", ConsoleColor.Red);
+                        Console.WriteLine("Simple Calculator");
+                        Color("=================", ConsoleColor.Red);
                     }
+                }
+
+
+
+
+                while (true)
+                {
+                    while (true)
+                    {
+                        Color2("Write an operation: ", ConsoleColor.Green);
+                        ops.op = Console.ReadLine();
+                        if (ops.op != "+" && ops.op != "-" && ops.op != "*" && ops.op != "/")
+                        {
+                            Color("Please write a valid operation", ConsoleColor.Red);
+                            Console.ReadLine();
+                            Console.Clear();
+                            Color("=================", ConsoleColor.Red);
+                            Console.WriteLine("Simple Calculator");
+                            Color("=================\n\n", ConsoleColor.Red);
+                            Color2("Your first number: ", ConsoleColor.Green);
+                            Console.Write(nums.Num1 + "\n");
+
+
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    while (true)
+                    {
+                        Color2("Your second number: ", ConsoleColor.Green);
+                        string num2 = Console.ReadLine();
+                        try
+                        {
+                            nums.Num2 = Convert.ToDecimal(num2);
+                            break;
+                        }
+                        catch (FormatException)
+                        {
+                            Color("ERROR, Please use numbers!", ConsoleColor.Red);
+                            Console.ReadLine();
+                            Console.Clear();
+                            Color("=================", ConsoleColor.Red);
+                            Console.WriteLine("Simple Calculator");
+                            Color("=================\n\n", ConsoleColor.Red);
+                            Color2("Your first number: ", ConsoleColor.Green);
+                            Console.Write(nums.Num1 + "\n");
+                            Color2("Write an operation: ", ConsoleColor.Green);
+                            Console.Write(ops.op + "\n");
+                        }
+                    }
+
+                    switch (ops.op)
+                    {
+                        case "+":
+                            nums.Num3 = nums.Num1 + nums.Num2;
+                            Color2($"Your result: ", ConsoleColor.Green);
+                            Console.Write($"{nums.Num3}\n");
+                            nums.Num1 = nums.Num3;
+
+                            break;
+                        case "-":
+                            nums.Num3 = nums.Num1 - nums.Num2;
+                            Color2($"Your result: ", ConsoleColor.Green);
+                            Console.Write($"{nums.Num3} \n");
+                            nums.Num1 = nums.Num3;
+
+                            break;
+                        case "*":
+                            nums.Num3 = nums.Num1 * nums.Num2;
+                            Color2($"Your result: ", ConsoleColor.Green);
+                            Console.Write($"{nums.Num3}\n");
+                            nums.Num1 = nums.Num3;
+
+                            break;
+                        case "/":
+                            try
+                            {
+                                nums.Num3 = nums.Num1 / nums.Num2;
+                                Color2($"Your result: ", ConsoleColor.Green);
+                                Console.Write($"{nums.Num3}\n");
+                                nums.Num1 = nums.Num3;
+
+                            }
+                            catch (DivideByZeroException)
+                            {
+                                Color("You cant divide by 0", ConsoleColor.Red);
+                            }
+                            break;
+                    }
+                    Console.WriteLine("\n");
+                    Color2("Do you want to continue? y/n: ", ConsoleColor.Green);
+                    string yesno = Console.ReadLine().ToLower();
+                    Console.Clear();
+                    Color("=================", ConsoleColor.Red);
+                    Console.WriteLine("Simple Calculator");
+                    Color("=================\n\n", ConsoleColor.Red);
+                    Color2("Your first number: ", ConsoleColor.Green);
+                    Console.Write(nums.Num1 + "\n");
+                    if (yesno == "n")
+                    {
+                        Console.Clear();
+                        break;
+                    }
+                }
+                Color2("Do you want to close the console?: Y/N ", ConsoleColor.Green);
+                string yesno2 = Console.ReadLine().ToLower();
+                if (yesno2 == "y")
+                {
                     break;
-                default:
-                    Console.WriteLine("Error, invalid option."); //and here if they chose anything than a,s,m or d, made an error confirmation for user to let them know
-                    break;
+                }
+                Console.Clear();
+
             }
 
-            Console.WriteLine("\nPress any key to close the calculator..."); // a way to close the console for the user
-            Console.ReadKey();
 
+
+
+
+        }
+        static void Color(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+        static void Color2(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ResetColor();
         }
     }
 }
